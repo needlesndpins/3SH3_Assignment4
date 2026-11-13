@@ -32,8 +32,50 @@
 #define OFFSET_MASK 255 // page size - 1
 #define BUFF_SIZE 16
 
+typedef struct{
+    int pageNum;
+    int frameNum;
+} TLBentry;
+
+TLBentry TLB[NUM_TLB];
+int next = 0;
+
+//NOTE: check if this should return the frame number or the TLB entry itself
+//searches TLB and returns frame number corresponding to given page number
+int search_TLB(int page){
+    for(int i = 0; i < NUM_TLB; i++){
+        if(TLB[i].pageNum == page){
+            return TLB[i].frameNum;
+        }
+    }
+    return -1; //failed to find entry return -1
+}
+
+//adds to TLB in FIFO matter
+void TLB_Add(int page, int frame){
+    TLB[next].pageNum = page;
+    TLB[next].frameNum = frame;
+
+    next = (next + 1) % NUM_TLB; 
+    return;
+}
+
+//updates TLB entry in place or if no page entry found adds the given entry
+void TLB_Update(int page, int frame){
+    for(int i = 0; i < NUM_TLB; i++){
+        if(TLB[i].pageNum == page){
+            TLB[i].frameNum = frame;
+            return;
+        }
+    }
+    TLB_Add(page, frame); //failed to find page in TLB so adds new TLB entry
+    return;
+}
+
 
 int main(){ 
+
+    TLBentry TLB[NUM_TLB];
 
     int page_table[NUM_PAGES];
     char buff[BUFF_SIZE];
@@ -74,6 +116,8 @@ int main(){
 
         // Must add entry to Page in TLB in either case
     }
+
+    return 0;
 
 }
 
