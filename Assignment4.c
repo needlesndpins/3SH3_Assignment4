@@ -75,8 +75,6 @@ void TLB_Update(int page, int frame){
 
 int main(){ 
 
-    TLBentry TLB[NUM_TLB];
-
     int page_table[NUM_PAGES];
     char buff[BUFF_SIZE];
 
