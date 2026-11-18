@@ -195,6 +195,8 @@ int main(){
     if(fptr == NULL){ 
         return 0;
     }
+    int num_faults = 0;
+    int num_addresses = 0;
 
     // Read all lines from addresses.txt
     while(fgets(buff,BUFF_SIZE,fptr) != NULL){ 
@@ -211,6 +213,7 @@ int main(){
 
         int frame_num; 
 
+
         // Use page num to index TLB 
         // Check if exists in there, if doesn't then go to page table 
 
@@ -223,6 +226,10 @@ int main(){
         // Page not in page table
         if(page_table[page_num] == -1){ 
             frame_num = page_fault(page_num,offset);
+            num_faults ++;
+        }
+        else{ 
+            frame_num = page_table[page_num];
         }
 
         int physical_add = (frame_num << PAGE_BITS) | offset;
@@ -232,12 +239,16 @@ int main(){
 
         printf("Virtual address: %d Physical address = %d Value = %d\n",
         logical_add, physical_add, val);
+        num_addresses ++;
 
         // Must add entry to Page in TLB in either case
 
 
 
     }
+
+    printf("Total addresses = %d\n",num_addresses);
+    printf("Page_faults = %d\n",num_faults);
 
     // Free and close memory mapped file
     munmap(mapfptr, FILE_SIZE);
