@@ -81,8 +81,8 @@ void TLB_Add(int page, int frame){
 //updates TLB entry in place or if no page entry found adds the given entry
 void TLB_Update(int page, int frame){
     for(int i = 0; i < NUM_TLB; i++){
-        if(TLB[i].pageNum == page){
-            TLB[i].frameNum = frame;
+        if(TLB[i].frameNum == frame){
+            TLB[i].pageNum = page;
             return;
         }
     }
@@ -197,6 +197,7 @@ int main(){
     }
     int num_faults = 0;
     int num_addresses = 0;
+    int num_TLBhits = 0;
 
     // Read all lines from addresses.txt
     while(fgets(buff,BUFF_SIZE,fptr) != NULL){ 
@@ -218,19 +219,27 @@ int main(){
         // Check if exists in there, if doesn't then go to page table 
 
         // Query TLB
+        if(search_TLB(page_num) == -1){
+            if(page_table[page_num] == -1){ 
+                frame_num = page_fault(page_num,offset);
+                num_faults ++;
+            }
+            else{ 
+                frame_num = page_table[page_num];
+            }
+            TLB_Update(page_num,frame_num);
+        }else{
+            frame_num = search_TLB(page_num);
+            num_TLBhits++;
+        }
+
 
         // IF page num in TLB get frame number 
         // Else go to page table
         //  If in PT get frame number
         //  else page fault
         // Page not in page table
-        if(page_table[page_num] == -1){ 
-            frame_num = page_fault(page_num,offset);
-            num_faults ++;
-        }
-        else{ 
-            frame_num = page_table[page_num];
-        }
+        
 
         int physical_add = (frame_num << PAGE_BITS) | offset;
 
@@ -249,6 +258,7 @@ int main(){
 
     printf("Total addresses = %d\n",num_addresses);
     printf("Page_faults = %d\n",num_faults);
+    printf("TLB Hits = %d\n",num_TLBhits);
 
     // Free and close memory mapped file
     munmap(mapfptr, FILE_SIZE);
