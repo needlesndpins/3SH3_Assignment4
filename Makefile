@@ -1,5 +1,5 @@
 A4: Assignment4.c
-	gcc Assignment4.c -o A4
+	gcc Assignment4.c -o assignment4
 
 clean: 
-	rm -f A4
+	rm -f assignment4
